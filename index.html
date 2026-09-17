@@ -80,11 +80,23 @@
     </div>
 
     <script>
-        // KREDENSIAL SUPABASE (Ganti dengan data dari Dashboard Supabase Anda)
-        const SUPABASE_URL = 'https://dredbtdisizkuprcvmea.supabase.co/rest/v1/';
+        // Helper untuk mencegah XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // KREDENSIAL SUPABASE
+        const SUPABASE_URL = 'https://dredbtdisizkuprcvmea.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWRidGRpc2l6a3VwcmN2bWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2Mzc5MTAsImV4cCI6MjEwNTIxMzkxMH0.bcaGwVXvZQDz5SnJaX7RqVXsT0o5f5RcrzOIoHaPSeg';
 
-        const supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Inisialisasi Supabase JS Client dari global window.supabase
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const form = document.getElementById('tugasForm');
         const tableBody = document.getElementById('tugasTableBody');
@@ -92,43 +104,48 @@
 
         // Fetch & Tampilkan Data Tugas
         async function loadTugas() {
-            const { data, error } = await supabase
-                .from('tugas')
-                .select('*')
-                .order('deadline', { ascending: true });
+            try {
+                const { data, error } = await supabaseClient
+                    .from('tugas')
+                    .select('*')
+                    .order('deadline', { ascending: true });
 
-            if (error) {
-                console.error('Error fetching data:', error);
-                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal memuat data</td></tr>`;
-                return;
+                if (error) {
+                    console.error('Error fetching data:', error);
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal memuat data: ${escapeHtml(error.message)}</td></tr>`;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada tugas yang diunggah.</td></tr>`;
+                    return;
+                }
+
+                tableBody.innerHTML = '';
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-slate-50';
+                    row.innerHTML = `
+              <td class="p-3">
+                <div class="font-semibold text-slate-800">${escapeHtml(item.judul)}</div>
+                <div class="text-xs text-slate-500">${escapeHtml(item.matakuliah)}</div>
+              </td>
+              <td class="p-3 text-slate-600">${escapeHtml(item.deadline)}</td>
+              <td class="p-3">
+                <span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-800 font-medium">${escapeHtml(item.status || 'Tersimpan')}</span>
+              </td>
+              <td class="p-3">
+                <a href="${escapeHtml(item.file_url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded hover:bg-emerald-700 transition">
+                  👁️ Buka File
+                </a>
+              </td>
+            `;
+                    tableBody.appendChild(row);
+                });
+            } catch (err) {
+                console.error('Unexpected error loading tasks:', err);
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Terjadi kesalahan: ${escapeHtml(err.message)}</td></tr>`;
             }
-
-            if (data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada tugas yang diunggah.</td></tr>`;
-                return;
-            }
-
-            tableBody.innerHTML = '';
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-slate-50';
-                row.innerHTML = `
-          <td class="p-3">
-            <div class="font-semibold text-slate-800">${item.judul}</div>
-            <div class="text-xs text-slate-500">${item.matakuliah}</div>
-          </td>
-          <td class="p-3 text-slate-600">${item.deadline}</td>
-          <td class="p-3">
-            <span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-800 font-medium">${item.status}</span>
-          </td>
-          <td class="p-3">
-            <a href="${item.file_url}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded hover:bg-emerald-700 transition">
-              👁️ Buka File
-            </a>
-          </td>
-        `;
-                tableBody.appendChild(row);
-            });
         }
 
         // Submit Form & Upload File ke Supabase Storage
@@ -137,66 +154,71 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Mengunggah file...';
 
-            const judul = document.getElementById('judul').value;
-            const matakuliah = document.getElementById('matakuliah').value;
-            const deadline = document.getElementById('deadline').value;
-            const deskripsi = document.getElementById('deskripsi').value;
-            const fileInput = document.getElementById('file_tugas');
-            const file = fileInput.files[0];
+            try {
+                const judul = document.getElementById('judul').value;
+                const matakuliah = document.getElementById('matakuliah').value;
+                const deadline = document.getElementById('deadline').value;
+                const deskripsi = document.getElementById('deskripsi').value;
+                const fileInput = document.getElementById('file_tugas');
+                const file = fileInput.files[0];
 
-            if (!file) {
-                alert('Pilih file tugas terlebih dahulu!');
+                if (!file) {
+                    alert('Pilih file tugas terlebih dahulu!');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Simpan & Upload Tugas';
+                    return;
+                }
+
+                // Generate nama unik untuk file
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                // 1. Upload ke Storage Bucket
+                const { data: storageData, error: storageError } = await supabaseClient.storage
+                    .from('tugas-bucket')
+                    .upload(filePath, file);
+
+                if (storageError) {
+                    alert('Gagal mengunggah file: ' + storageError.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Simpan & Upload Tugas';
+                    return;
+                }
+
+                // 2. Dapatkan Public URL File
+                const { data: urlData } = supabaseClient.storage
+                    .from('tugas-bucket')
+                    .getPublicUrl(filePath);
+
+                const publicUrl = urlData.publicUrl;
+
+                // 3. Simpan Metadata ke Tabel Database
+                const { error: dbError } = await supabaseClient
+                    .from('tugas')
+                    .insert([{
+                        judul,
+                        matakuliah,
+                        deadline,
+                        deskripsi,
+                        file_name: file.name,
+                        file_url: publicUrl
+                    }]);
+
+                if (dbError) {
+                    alert('Gagal menyimpan metadata ke database: ' + dbError.message);
+                } else {
+                    alert('Tugas berhasil diunggah!');
+                    form.reset();
+                    loadTugas();
+                }
+            } catch (err) {
+                console.error('Unexpected error on submit:', err);
+                alert('Terjadi kesalahan tidak terduga: ' + err.message);
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Simpan & Upload Tugas';
-                return;
             }
-
-            // Generate nama unik untuk file
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-            const filePath = `${fileName}`;
-
-            // 1. Upload ke Storage Bucket
-            const { data: storageData, error: storageError } = await supabase.storage
-                .from('tugas-bucket')
-                .upload(filePath, file);
-
-            if (storageError) {
-                alert('Gagal mengunggah file: ' + storageError.message);
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Simpan & Upload Tugas';
-                return;
-            }
-
-            // 2. Dapatkan Public URL File
-            const { data: urlData } = supabase.storage
-                .from('tugas-bucket')
-                .getPublicUrl(filePath);
-
-            const publicUrl = urlData.publicUrl;
-
-            // 3. Simpan Metadata ke Tabel Database
-            const { error: dbError } = await supabase
-                .from('tugas')
-                .insert([{
-                    judul,
-                    matakuliah,
-                    deadline,
-                    deskripsi,
-                    file_name: file.name,
-                    file_url: publicUrl
-                }]);
-
-            if (dbError) {
-                alert('Gagal menyimpan metadata ke database: ' + dbError.message);
-            } else {
-                alert('Tugas berhasil diunggah!');
-                form.reset();
-                loadTugas();
-            }
-
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Simpan & Upload Tugas';
         });
 
         // Jalankan saat pertama kali dibuka
