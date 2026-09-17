@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository Tugas Kuliah</title>
+    <!-- Tailwind CSS untuk tampilan modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md">
+        <h1 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-3">📚 Repository & Management Tugas</h1>
+
+        <!-- Form Input Tugas -->
+        <form id="tugasForm" class="space-y-4 mb-8 bg-slate-50 p-5 rounded-lg border border-slate-200">
+            <h2 class="text-lg font-semibold text-slate-700 mb-2">Tambah Tugas Baru</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Judul Tugas</label>
+                    <input type="text" id="judul" required
+                        class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Mata Kuliah</label>
+                    <input type="text" id="matakuliah" required
+                        class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Tenggat Waktu (Deadline)</label>
+                    <input type="date" id="deadline" required
+                        class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700">Upload File Tugas (PDF/Gambar/Zip)</label>
+                    <input type="file" id="file_tugas" required
+                        class="w-full mt-1 p-1.5 border rounded-md bg-white text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Deskripsi / Catatan</label>
+                <textarea id="deskripsi" rows="2"
+                    class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn"
+                class="w-full bg-blue-600 text-white font-medium py-2.5 rounded-md hover:bg-blue-700 transition duration-200">
+                Simpan & Upload Tugas
+            </button>
+        </form>
+
+        <!-- Tabel List Tugas -->
+        <h2 class="text-xl font-semibold text-slate-800 mb-4">Daftar Tugas Tersimpan</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-700 text-sm font-semibold border-b">
+                        <th class="p-3">Judul & Matakuliah</th>
+                        <th class="p-3">Deadline</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">Aksi File</th>
+                    </tr>
+                </thead>
+                <tbody id="tugasTableBody" class="divide-y divide-slate-200 text-sm">
+                    <tr>
+                        <td colspan="4" class="p-4 text-center text-slate-500">Memuat data tugas...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // KREDENSIAL SUPABASE (Ganti dengan data dari Dashboard Supabase Anda)
+        const SUPABASE_URL = 'https://dredbtdisizkuprcvmea.supabase.co/rest/v1/';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWRidGRpc2l6a3VwcmN2bWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2Mzc5MTAsImV4cCI6MjEwNTIxMzkxMH0.bcaGwVXvZQDz5SnJaX7RqVXsT0o5f5RcrzOIoHaPSeg';
+
+        const supabase = supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const form = document.getElementById('tugasForm');
+        const tableBody = document.getElementById('tugasTableBody');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Fetch & Tampilkan Data Tugas
+        async function loadTugas() {
+            const { data, error } = await supabase
+                .from('tugas')
+                .select('*')
+                .order('deadline', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching data:', error);
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal memuat data</td></tr>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada tugas yang diunggah.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50';
+                row.innerHTML = `
+          <td class="p-3">
+            <div class="font-semibold text-slate-800">${item.judul}</div>
+            <div class="text-xs text-slate-500">${item.matakuliah}</div>
+          </td>
+          <td class="p-3 text-slate-600">${item.deadline}</td>
+          <td class="p-3">
+            <span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-800 font-medium">${item.status}</span>
+          </td>
+          <td class="p-3">
+            <a href="${item.file_url}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded hover:bg-emerald-700 transition">
+              👁️ Buka File
+            </a>
+          </td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Submit Form & Upload File ke Supabase Storage
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Mengunggah file...';
+
+            const judul = document.getElementById('judul').value;
+            const matakuliah = document.getElementById('matakuliah').value;
+            const deadline = document.getElementById('deadline').value;
+            const deskripsi = document.getElementById('deskripsi').value;
+            const fileInput = document.getElementById('file_tugas');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Pilih file tugas terlebih dahulu!');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Simpan & Upload Tugas';
+                return;
+            }
+
+            // Generate nama unik untuk file
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            // 1. Upload ke Storage Bucket
+            const { data: storageData, error: storageError } = await supabase.storage
+                .from('tugas-bucket')
+                .upload(filePath, file);
+
+            if (storageError) {
+                alert('Gagal mengunggah file: ' + storageError.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Simpan & Upload Tugas';
+                return;
+            }
+
+            // 2. Dapatkan Public URL File
+            const { data: urlData } = supabase.storage
+                .from('tugas-bucket')
+                .getPublicUrl(filePath);
+
+            const publicUrl = urlData.publicUrl;
+
+            // 3. Simpan Metadata ke Tabel Database
+            const { error: dbError } = await supabase
+                .from('tugas')
+                .insert([{
+                    judul,
+                    matakuliah,
+                    deadline,
+                    deskripsi,
+                    file_name: file.name,
+                    file_url: publicUrl
+                }]);
+
+            if (dbError) {
+                alert('Gagal menyimpan metadata ke database: ' + dbError.message);
+            } else {
+                alert('Tugas berhasil diunggah!');
+                form.reset();
+                loadTugas();
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Simpan & Upload Tugas';
+        });
+
+        // Jalankan saat pertama kali dibuka
+        loadTugas();
+    </script>
+</body>
+
+</html>
