@@ -1,229 +1,383 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repository Tugas Kuliah</title>
-    <!-- Tailwind CSS untuk tampilan modern -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- ========================================================= -->
+    <!-- METADATA WAJIB (Penilaian Metadata 25%)                   -->
+    <!-- ========================================================= -->
+    <title>Profil Diri Pixel Vintage | Informatika</title>
+    <meta name="description" content="Halaman profil diri interaktif bertema pixel vintage 8-bit untuk tugas HTML5. Berisi biodata, daftar mata kuliah semester ini, dan link kontak.">
+    
+    <!-- Metadata Open Graph (OG Tags) -->
+    <meta property="og:title" content="Profil Diri Pixel Vintage - Website Personal">
+    <meta property="og:description" content="Website biodata siswa bertema retro pixel 8-bit dengan kombinasi warna biru, abu-abu, hitam, dan putih.">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630/0f172a/38bdf8?text=Pixel+Profile+8-Bit">
+
+    <!-- Google Fonts: Pixel Fonts (Press Start 2P & VT323) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========================================================= */
+        /* STYLING TEMA PIXEL VINTAGE (Biru, Abu-abu, Hitam, Putih)  */
+        /* ========================================================= */
+        :root {
+            --bg-dark: #0f172a;       /* Hitam / Slate Gelap */
+            --bg-card: #1e293b;       /* Abu-abu Slate */
+            --accent-blue: #38bdf8;   /* Biru Pixel / Cyan Bright */
+            --accent-blue-dark: #0284c7; /* Biru Tua */
+            --text-white: #f8fafc;    /* Putih */
+            --text-gray: #94a3b8;     /* Abu-abu Terang */
+            --border-black: #000000;  /* Hitam Pekat */
+            --border-white: #ffffff;  /* Putih */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            image-rendering: pixelated; /* Efek Pixel art */
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            font-size: 20px;
+            line-height: 1.5;
+            padding: 20px;
+            /* Pola Latar Belakang Pixel Grid Vintage */
+            background-image: 
+                radial-gradient(#334155 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95));
+            background-size: 16px 16px, 100% 100%;
+        }
+
+        /* Container Utama */
+        .wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Frame Pixel Border Khusus (Efek Retro 8-Bit) */
+        .pixel-box {
+            background-color: var(--bg-card);
+            border: 4px solid var(--border-black);
+            box-shadow: 
+                0 0 0 4px var(--accent-blue),
+                8px 8px 0px var(--border-black);
+            padding: 24px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        /* HEADER & NAVIGASI */
+        header {
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 22px;
+            color: var(--accent-blue);
+            text-shadow: 3px 3px 0px var(--border-black);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        nav a {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            color: var(--text-white);
+            background-color: var(--accent-blue-dark);
+            padding: 10px 16px;
+            text-decoration: none;
+            border: 2px solid var(--border-black);
+            box-shadow: 3px 3px 0px var(--border-black);
+            display: inline-block;
+            transition: transform 0.1s;
+        }
+
+        nav a:hover, nav a:focus {
+            background-color: var(--accent-blue);
+            color: var(--border-black);
+            transform: translate(-2px, -2px);
+        }
+
+        /* JUDUL SECTION (H2 & H3) */
+        h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            color: var(--accent-blue);
+            border-bottom: 4px dashed var(--accent-blue);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 10px;
+        }
+
+        /* PROFIL & FOTO DIRI */
+        .profile-container {
+            display: flex;
+            flex-direction: row;
+            gap: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .avatar-box {
+            border: 4px solid var(--border-black);
+            background-color: var(--bg-dark);
+            padding: 6px;
+            box-shadow: 4px 4px 0px var(--accent-blue);
+        }
+
+        .avatar-box img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+            filter: contrast(110%);
+        }
+
+        .profile-text {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .profile-text p {
+            margin-bottom: 10px;
+            color: var(--text-white);
+        }
+
+        /* TABEL MATA KULIAH */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 18px;
+            background-color: var(--bg-dark);
+            border: 3px solid var(--border-black);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 2px solid #334155;
+        }
+
+        th {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            background-color: var(--accent-blue-dark);
+            color: var(--text-white);
+        }
+
+        tr:nth-child(even) {
+            background-color: #1e293b;
+        }
+
+        tr:hover {
+            background-color: #334155;
+        }
+
+        /* LINK & KONTAK */
+        .link-btn {
+            display: inline-block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            color: var(--border-black);
+            background-color: var(--accent-blue);
+            padding: 12px 20px;
+            text-decoration: none;
+            border: 3px solid var(--border-black);
+            box-shadow: 4px 4px 0px var(--text-white);
+            margin-top: 10px;
+        }
+
+        .link-btn:hover, .link-btn:focus {
+            background-color: var(--text-white);
+            color: var(--border-black);
+            box-shadow: 4px 4px 0px var(--accent-blue);
+        }
+
+        /* DEKORASI PIXEL DEKORATIF (Dino/Pixel Ground) */
+        .pixel-ground {
+            height: 12px;
+            background-color: var(--accent-blue);
+            border-top: 3px solid var(--border-black);
+            margin-top: 15px;
+        }
+
+        /* FOOTER SEMANTIK */
+        footer {
+            text-align: center;
+            font-size: 16px;
+            color: var(--text-gray);
+            padding: 20px 0;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .profile-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            h1 { font-size: 18px; }
+            h2 { font-size: 14px; }
+        }
+    </style>
 </head>
+<body>
 
-<body class="bg-slate-100 min-h-screen p-4 md:p-8">
+    <div class="wrapper">
 
-    <div class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md">
-        <h1 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-3">📚 Repository & Management Tugas</h1>
+        <!-- ========================================================= -->
+        <!-- ELEMEN SEMANTIK: <header> & <nav>                         -->
+        <!-- ========================================================= -->
+        <header class="pixel-box">
+            <h1>WORLD WIDE WEB PROFILE</h1>
+            <h3>[ 8-Bit Pixel Vintage Edition ]</h3>
+            
+            <nav aria-label="Navigasi Utama">
+                <ul>
+                    <li><a href="#profil">PROFIL</a></li>
+                    <li><a href="#matkul">MATA KULIAH</a></li>
+                    <li><a href="#kontak">KONTAK</a></li>
+                </ul>
+            </nav>
+        </header>
 
-        <!-- Form Input Tugas -->
-        <form id="tugasForm" class="space-y-4 mb-8 bg-slate-50 p-5 rounded-lg border border-slate-200">
-            <h2 class="text-lg font-semibold text-slate-700 mb-2">Tambah Tugas Baru</h2>
+        <!-- ========================================================= -->
+        <!-- ELEMEN SEMANTIK: <main> (Area Konten Utama)              -->
+        <!-- ========================================================= -->
+        <main>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Judul Tugas</label>
-                    <input type="text" id="judul" required
-                        class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            <!-- SECTION 1: PROFIL DIRI / BIODATA -->
+            <section id="profil" class="pixel-box" aria-labelledby="judul-profil">
+                <h2 id="judul-profil">01. PROFIL DIRI</h2>
+                
+                <div class="profile-container">
+                    <!-- Foto Diri dengan Atribut Alt (Persyaratan Aksesibilitas) -->
+                    <div class="avatar-box">
+                        <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Informatika&backgroundColor=0f172a" 
+                             alt="Foto Profil Diri Karakter Pixel 8-Bit">
+                    </div>
+                    
+                    <div class="profile-text">
+                        <h3>PLAYER 1: MAHASISWA INFORMATIKA</h3>
+                        <p><strong>Nama:</strong> Nalini Syifa Olivia</p>
+                        <p><strong>Program Studi:</strong> Teknik Informatika</p>
+                        <p><strong>Minat & Keahlian:</strong> Web Development, Relational Database, SQL & UI Design.</p>
+                        <p><strong>Bio Singkat:</strong> Halo! Saya seorang mahasiswa Informatika yang senang mengeksplorasi dunia pemrograman web, desain antarmuka retro pixel, serta pengolahan basis data.</p>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Mata Kuliah</label>
-                    <input type="text" id="matakuliah" required
-                        class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+
+                <div class="pixel-ground"></div>
+            </section>
+
+            <!-- SECTION 2: TABEL MATA KULIAH SEMESTER INI -->
+            <section id="matkul" class="pixel-box" aria-labelledby="judul-matkul">
+                <h2 id="judul-matkul">02. MATA KULIAH SEMESTER INI</h2>
+                <p style="margin-bottom: 15px; color: var(--text-gray);">Tabel jadwal dan daftar mata kuliah yang diambil pada semester ini:</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Kode</th>
+                                <th>Mata Kuliah</th>
+                                <th>SKS</th>
+                                <th>Hari & Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>IF201</td>
+                                <td>Pemrograman Web & HTML5</td>
+                                <td>3 SKS</td>
+                                <td>Senin, 08.00 - 10.30</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>IF202</td>
+                                <td>Basis Data & SQL</td>
+                                <td>3 SKS</td>
+                                <td>Selasa, 10.00 - 12.30</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>IF203</td>
+                                <td>Algoritma & Struktur Data</td>
+                                <td>4 SKS</td>
+                                <td>Rabu, 13.00 - 15.30</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>IF204</td>
+                                <td>Sistem Operasi</td>
+                                <td>3 SKS</td>
+                                <td>Kamis, 08.00 - 10.30</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>IF205</td>
+                                <td>Interaksi Manusia & Komputer</td>
+                                <td>2 SKS</td>
+                                <td>Jumat, 09.00 - 11.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Tenggat Waktu (Deadline)</label>
-                    <input type="date" id="deadline" required
-                        class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Upload File Tugas (PDF/Gambar/Zip)</label>
-                    <input type="file" id="file_tugas" required
-                        class="w-full mt-1 p-1.5 border rounded-md bg-white text-sm">
-                </div>
-            </div>
+                <div class="pixel-ground"></div>
+            </section>
 
-            <div>
-                <label class="block text-sm font-medium text-slate-700">Deskripsi / Catatan</label>
-                <textarea id="deskripsi" rows="2"
-                    class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-            </div>
+            <!-- SECTION 3: KONTAK & LINK EXTERNAL -->
+            <section id="kontak" class="pixel-box" aria-labelledby="judul-kontak">
+                <h2 id="judul-kontak">03. TAUTAN & KONTAK</h2>
+                <p>Klik tombol di bawah ini untuk melihat portofolio / repository kode lengkap saya:</p>
+                
+                <!-- Minimal 1 Link (Atribut Wajib) -->
+                <p>
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="link-btn">
+                        [▶] KUNJUNGI GITHUB SAYA
+                    </a>
+                </p>
+            </section>
 
-            <button type="submit" id="submitBtn"
-                class="w-full bg-blue-600 text-white font-medium py-2.5 rounded-md hover:bg-blue-700 transition duration-200">
-                Simpan & Upload Tugas
-            </button>
-        </form>
+        </main>
 
-        <!-- Tabel List Tugas -->
-        <h2 class="text-xl font-semibold text-slate-800 mb-4">Daftar Tugas Tersimpan</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-100 text-slate-700 text-sm font-semibold border-b">
-                        <th class="p-3">Judul & Matakuliah</th>
-                        <th class="p-3">Deadline</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3">Aksi File</th>
-                    </tr>
-                </thead>
-                <tbody id="tugasTableBody" class="divide-y divide-slate-200 text-sm">
-                    <tr>
-                        <td colspan="4" class="p-4 text-center text-slate-500">Memuat data tugas...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- ========================================================= -->
+        <!-- ELEMEN SEMANTIK: <footer>                                 -->
+        <!-- ========================================================= -->
+        <footer class="pixel-box">
+            <p>© 2026 Profil Diri Pixel Vintage — Dibuat untuk Tugas HTML5.</p>
+        </footer>
+
     </div>
 
-    <script>
-        // Helper untuk mencegah XSS
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        // KREDENSIAL SUPABASE
-        const SUPABASE_URL = 'https://dredbtdisizkuprcvmea.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWRidGRpc2l6a3VwcmN2bWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2Mzc5MTAsImV4cCI6MjEwNTIxMzkxMH0.bcaGwVXvZQDz5SnJaX7RqVXsT0o5f5RcrzOIoHaPSeg';
-
-        // Inisialisasi Supabase JS Client dari global window.supabase
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        const form = document.getElementById('tugasForm');
-        const tableBody = document.getElementById('tugasTableBody');
-        const submitBtn = document.getElementById('submitBtn');
-
-        // Fetch & Tampilkan Data Tugas
-        async function loadTugas() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('tugas')
-                    .select('*')
-                    .order('deadline', { ascending: true });
-
-                if (error) {
-                    console.error('Error fetching data:', error);
-                    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Gagal memuat data: ${escapeHtml(error.message)}</td></tr>`;
-                    return;
-                }
-
-                if (!data || data.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada tugas yang diunggah.</td></tr>`;
-                    return;
-                }
-
-                tableBody.innerHTML = '';
-                data.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-slate-50';
-                    row.innerHTML = `
-              <td class="p-3">
-                <div class="font-semibold text-slate-800">${escapeHtml(item.judul)}</div>
-                <div class="text-xs text-slate-500">${escapeHtml(item.matakuliah)}</div>
-              </td>
-              <td class="p-3 text-slate-600">${escapeHtml(item.deadline)}</td>
-              <td class="p-3">
-                <span class="px-2 py-1 text-xs rounded-full bg-amber-100 text-amber-800 font-medium">${escapeHtml(item.status || 'Tersimpan')}</span>
-              </td>
-              <td class="p-3">
-                <a href="${escapeHtml(item.file_url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded hover:bg-emerald-700 transition">
-                  👁️ Buka File
-                </a>
-              </td>
-            `;
-                    tableBody.appendChild(row);
-                });
-            } catch (err) {
-                console.error('Unexpected error loading tasks:', err);
-                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Terjadi kesalahan: ${escapeHtml(err.message)}</td></tr>`;
-            }
-        }
-
-        // Submit Form & Upload File ke Supabase Storage
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Mengunggah file...';
-
-            try {
-                const judul = document.getElementById('judul').value;
-                const matakuliah = document.getElementById('matakuliah').value;
-                const deadline = document.getElementById('deadline').value;
-                const deskripsi = document.getElementById('deskripsi').value;
-                const fileInput = document.getElementById('file_tugas');
-                const file = fileInput.files[0];
-
-                if (!file) {
-                    alert('Pilih file tugas terlebih dahulu!');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Simpan & Upload Tugas';
-                    return;
-                }
-
-                // Generate nama unik untuk file
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-                const filePath = `${fileName}`;
-
-                // 1. Upload ke Storage Bucket
-                const { data: storageData, error: storageError } = await supabaseClient.storage
-                    .from('tugas-bucket')
-                    .upload(filePath, file);
-
-                if (storageError) {
-                    alert('Gagal mengunggah file: ' + storageError.message);
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Simpan & Upload Tugas';
-                    return;
-                }
-
-                // 2. Dapatkan Public URL File
-                const { data: urlData } = supabaseClient.storage
-                    .from('tugas-bucket')
-                    .getPublicUrl(filePath);
-
-                const publicUrl = urlData.publicUrl;
-
-                // 3. Simpan Metadata ke Tabel Database
-                const { error: dbError } = await supabaseClient
-                    .from('tugas')
-                    .insert([{
-                        judul,
-                        matakuliah,
-                        deadline,
-                        deskripsi,
-                        file_name: file.name,
-                        file_url: publicUrl
-                    }]);
-
-                if (dbError) {
-                    alert('Gagal menyimpan metadata ke database: ' + dbError.message);
-                } else {
-                    alert('Tugas berhasil diunggah!');
-                    form.reset();
-                    loadTugas();
-                }
-            } catch (err) {
-                console.error('Unexpected error on submit:', err);
-                alert('Terjadi kesalahan tidak terduga: ' + err.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Simpan & Upload Tugas';
-            }
-        });
-
-        // Jalankan saat pertama kali dibuka
-        loadTugas();
-    </script>
 </body>
-
 </html>
